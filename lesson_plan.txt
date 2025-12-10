@@ -1,0 +1,614 @@
+1. Что такое API?
+
+API — это способ, по которому одно приложение общается с другим.
+
+API — это не обязательно веб, не обязательно интернет.
+
+Примеры API:
+Клавиатура → компьютер (у клавиатуры есть свой API)
+Telegram бот API (команды и методы)
+Python os library (это тоже API)
+Веб-сайты → сервер (веб API)
+
+API — это просто набор правил:
+
+“Вот так ты можешь со мной взаимодействовать”.
+
+
+
+
+2. Что такое Web API?
+
+Это API, доступный через Интернет, обычно по HTTP(S).
+
+Например:
+GET /users/
+POST /login/
+
+Возвращает JSON, XML или HTML.
+
+
+
+3. Что такое REST?
+
+REST (Representational State Transfer) — это архитектурный стиль для создания веб-API.
+REST — не библиотека, не фреймворк, не технология.
+Это принципы, которые делают API простым, логичным, предсказуемым.
+
+
+REST говорит:
+
+Используй стандартные HTTP-методы:
+GET (получить данные)
+POST (создать)
+PUT/PATCH (обновить)
+DELETE (удалить)
+
+Каждый ресурс должен иметь URL (Uniform Resource Locator):
+/users/
+/users/10/
+
+Ответы обычно в JSON.
+
+API должен быть stateless
+(сервер не должен хранить состояние между запросами — каждый запрос независим).
+
+
+
+4. Что такое REST API?
+
+REST API = Web API, который следует правилам REST.
+
+Это API, построенный:
+на HTTP,
+со стандартными методами,
+с ресурсами,
+в формате JSON.
+
+Пример REST API:
+GET /api/students/ → список студентов
+POST /api/students/ → создать студента
+GET /api/students/5/ → один студент
+DELETE /api/students/5/ → удалить
+
+Запросы — это действия,
+URL — это ресурсы,
+JSON — это данные.
+
+
+
+
+API — это способ, как программы общаются между собой.
+REST API — это веб-API, которое построено по стандартным правилам REST.
+Django REST Framework — это инструмент, который помогает быстро создавать REST API в Django.
+
+
+
+
+Что такое сериализатор?
+
+Serializer — превращает Django модель в JSON и обратно.
+
+
+
+
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def student_detail(request, pk):
+    try:
+        student = Student.objects.get(pk=pk)
+    except Student.DoesNotExist:
+        return Response({'error': 'Not found'}, status=404)
+
+    if request.method == 'GET':
+        serializer = StudentSerializer(student)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = StudentSerializer(student, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        student.delete()
+        return Response(status=204)
+
+
+
+
+
+
+
+
+from django.urls import path
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="My API",
+        default_version='v1',
+        description="API documentation",
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
+urlpatterns = [
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0)),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0)),
+]
+
+
+
+
+
+
+Serializers
+
+
+Что такое Serializer в DRF?
+
+Serializer — это инструмент, который превращает данные модели в JSON и обратно.
+
+Он делает два ключевых действия:
+serialization → из Python объекта (модели) → JSON
+deserialization → из JSON → Python объект → модель
+То есть это переводчик данных между Django и внешним миром.
+
+
+Зачем нужны сериализаторы?
+
+проверяют данные (валидация)
+преобразуют типы (строки → числа)
+принимают данные в POST/PUT/PATCH
+помогают сохранять объекты в БД
+возвращают данные в API ответах
+
+
+В DRF есть 2 основных типа сериализаторов:
+
+Serializer (ручной, полный контроль)
+ModelSerializer (автоматический, удобный)
+
+
+
+1. Serializer (ручной способ)
+
+Это «чистый» сериализатор.
+Ты сам указываешь поля, логики сохранения, обновления и т. д.
+
+Используется когда:
+нет модели
+сложный custom JSON формат
+нужна полная кастомизация
+
+Пример
+
+
+from rest_framework import serializers
+
+class StudentSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=100)
+    age = serializers.IntegerField()
+
+    def create(self, validated_data):
+        return Student.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.age = validated_data.get('age', instance.age)
+        instance.save()
+        return instance
+
+
+
+2. ModelSerializer (автоматический)
+
+Это — упрощённая версия Serializer.
+Он смотрит на модель и сам генерирует:
+
+поля
+create()
+update()
+типы данных
+валидаторы
+
+
+class StudentModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = '__all__'
+
+
+
+
+
+
+Paginations
+
+Pagination (пагинация) — это деление большого списка данных на страницы.
+Это уменьшает нагрузку на сервер и удобно для фронтенда.
+
+
+В DRF есть 3 популярных типа пагинации
+
+| Pagination                | Пример ответа                                     | Когда использовать             |
+| ------------------------- | ------------------------------------------------- | ------------------------------ |
+| **PageNumberPagination**  | `?page=2`                                         | обычная пагинация (как книги)  |
+| **LimitOffsetPagination** | `?limit=10&offset=20`                             | нужна прокрутка / lazy loading |
+| **CursorPagination**      | безопасная для сортировки, `next/previous` ссылки | большие проекты (много данных) |
+
+
+
+Настраиваем глобальную пагинацию (settings.py)
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,   # сколько объектов на странице
+}
+
+
+@api_view(['GET'])
+def objects_list(request):
+    objects = Object.objects.all()
+
+    paginator = PageNumberPagination()
+    paginator.page_size = 5 
+
+    result_page = paginator.paginate_queryset(objects, request)
+    serializer = ObjectSerializer(result_page, many=True)
+
+    return paginator.get_paginated_response(serializer.data)
+
+
+
+@api_view(['GET'])
+def objects_list(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 5
+
+    # paginator сам достанет нужные записи, если передать не queryset,
+    objects = Object.objects.all()
+
+    result_page = paginator.paginate_queryset(objects, request)
+    serializer = ObjectSerializer(result_page, many=True)
+
+    return paginator.get_paginated_response(serializer.data)
+
+
+
+Почему это не грузит память?
+
+Django ORM — lazy (ленивый).
+
+Object.objects.all() — не выполняет SQL сразу.
+SELECT * FROM main_object
+SQL выполняется только в момент обращения к данным — здесь:
+
+result_page = paginator.paginate_queryset(objects, request)
+SELECT * FROM main_object LIMIT 5 OFFSET 10
+
+
+unique_together = (('field1', 'field2'),) # в модели Django означает, что комбинация значений field1 и field2 должна быть уникальной для каждой записи в базе данных.
+
+
+
+from rest_framework import serializers
+from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
+from rest_framework.authtoken.models import Token
+from .models import User
+
+
+
+# Registration
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ('email', 'full_name', 'password', 'password2')
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError("Пароли не совпадают!")
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('password2')
+        user = User.objects.create_user(**validated_data)
+        Token.objects.create(user=user)  
+        return user
+
+
+# Login 
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        user = authenticate(email=attrs['email'], password=attrs['password'])
+        if not user:
+            raise serializers.ValidationError("Неверный email или пароль")
+
+        token, _ = Token.objects.get_or_create(user=user)
+        return {"token": token.key, "email": user.email}
+
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authtoken.models import Token
+
+from .serializers import RegisterSerializer, LoginSerializer
+
+# Register
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register(request):
+    serializer = RegisterSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response({"message": "Пользователь успешно создан!"})
+
+
+# Login
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login(request):
+    serializer = LoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    return Response(serializer.validated_data)   # вернёт token, email
+
+
+# Logout
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    Token.objects.filter(user=request.user).delete()
+    return Response({"message": "Токен успешно удалён, пользователь разлогинен!"})
+
+
+
+
+
+
+
+
+# Profile 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'full_name', 'phone_number')
+        read_only_fields = ('email',) 
+
+
+# Change Password
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, validators=[validate_password])
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        if not user.check_password(attrs['old_password']):
+            raise serializers.ValidationError("Старый пароль неверный")
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return user
+
+
+# Deactivate Account   
+class DeactivateSerializer(serializers.Serializer):
+    confirm = serializers.BooleanField()
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.is_active = False 
+        user.save()
+        return user
+
+
+
+
+
+# Profile View
+@api_view(['GET', 'PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def profile_view(request):
+    user = request.user
+
+    if request.method == 'GET':
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data)
+
+    if request.method in ('PUT', 'PATCH'):
+        serializer = UserProfileSerializer(user, data=request.data, partial=request.method == 'PATCH')
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+# Change Password
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response({"message": "Пароль успешно изменён!"}, status=status.HTTP_200_OK)
+
+
+# Deactivate Account
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def deactivate_account(request):
+    serializer = DeactivateSerializer(data=request.data, context={'request': request})
+    serializer.is_valid(raise_exception=True)
+
+    if not serializer.validated_data['confirm']:
+        return Response({"error": "Подтвердите деактивацию!"}, status=400)
+
+    serializer.save()
+    return Response({"message": "Аккаунт деактивирован!"})
+
+
+
+
+
+
+Generic views — это готовые классы, которые уже содержат типовую логику CRUD.
+Ты просто указываешь:
+ • какой queryset
+ • какой сериализатор
+ • какие пермишены
+
+И всё — DRF сам делает остальное.
+
+Generic views = меньше кода, меньше ошибок, быстрее разработка.
+
+Пример с ListCreateAPIView:
+
+
+class ProductListCreateView(ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
+
+
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.validated_data)
+
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+
+class ChangePasswordView(generics.GenericAPIView):
+    serializer_class = ChangePasswordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = self.get_serializer(
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        request.user.set_password(serializer.validated_data['new_password'])
+        request.user.save()
+
+        return Response({"message": "Пароль успешно изменён"})
+
+
+
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        Token.objects.filter(user=request.user).delete()
+        return Response({"message": "Вы вышли из системы"})
+
+
+class DeactivateAccountView(generics.GenericAPIView):
+    serializer_class = DeactivateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if not serializer.validated_data['confirm']:
+            return Response({"error": "Подтвердите деактивацию"}, status=400)
+
+        request.user.is_active = False
+        request.user.save()
+
+        return Response({"message": "Аккаунт деактивирован"})
+
+
+
+
+Что такое ViewSet в DRF
+
+ViewSet — это класс, который объединяет сразу несколько действий (list, retrieve, create, update, delete) в одном месте.
+
+
+
+Что такое Router
+
+Router — это автоматический генератор URL-ов для ViewSet-ов.
+
+
+
+
+
+
+Inlines
+Paginations in ViewSets
+Filters in ViewSets
+Permissions in ViewSets
+
+
+
+filterset_fields = {
+    'area': ['gte', 'lte'],   # area__gte=50, area__lte=100
+    'name': ['icontains'],    # name__icontains=проспект
+}
+
+
+
+import django_filters
+from .models import Apartment
+
+class ApartmentFilter(django_filters.FilterSet):
+    min_area = django_filters.NumberFilter(field_name='area', lookup_expr='gte')
+    max_area = django_filters.NumberFilter(field_name='area', lookup_expr='lte')
+    rooms = django_filters.NumberFilter(field_name='rooms_count')
+    block_name = django_filters.CharFilter(field_name='block__name', lookup_expr='icontains')
+
+    class Meta:
+        model = Apartment
+        fields = ['type', 'floor']
