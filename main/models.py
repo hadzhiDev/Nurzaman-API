@@ -15,7 +15,19 @@ class Object(models.Model):
     class Meta:
         verbose_name = "Объект"
         verbose_name_plural = "Объекты"
+
+
+class ObjectImage(models.Model):
+    object = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='images')
+    image = ResizedImageField(size=[800, 600], upload_to='objects/', verbose_name="Изображение объекта",
+                             quality=90, crop=['middle', 'center'])
     
+    class Meta:
+        verbose_name = "Изображение объекта"
+        verbose_name_plural = "Изображения объектов"
+
+    def __str__(self):
+        return f"Image for {self.object.name}"
 
 class Block(models.Model):
     name = models.CharField(max_length=100, verbose_name="Название блока")

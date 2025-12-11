@@ -1,12 +1,21 @@
 from django.contrib import admin
 
-from .models import Apartment, Block, Object
+from .models import Apartment, Block, Object, ObjectImage
+
+class BlockInline(admin.StackedInline):
+    model = Block
+    extra = 2
+
+class ObjectImageInline(admin.TabularInline):
+    model = ObjectImage
+    extra = 1
 
 
 @admin.register(Object)
 class ObjectAdmin(admin.ModelAdmin):
     list_display = ('name', 'address')
     search_fields = ('name', 'address')
+    inlines = [BlockInline, ObjectImageInline]
 
 
 @admin.register(Block)

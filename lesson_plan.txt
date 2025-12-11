@@ -599,16 +599,3 @@ filterset_fields = {
 }
 
 
-
-import django_filters
-from .models import Apartment
-
-class ApartmentFilter(django_filters.FilterSet):
-    min_area = django_filters.NumberFilter(field_name='area', lookup_expr='gte')
-    max_area = django_filters.NumberFilter(field_name='area', lookup_expr='lte')
-    rooms = django_filters.NumberFilter(field_name='rooms_count')
-    block_name = django_filters.CharFilter(field_name='block__name', lookup_expr='icontains')
-
-    class Meta:
-        model = Apartment
-        fields = ['type', 'floor']
