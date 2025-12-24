@@ -4,6 +4,8 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework.authtoken.models import Token
 from accounts.models import User
 
+from django.conf import settings
+
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -82,3 +84,31 @@ class GenericChangePasswordSerializer(serializers.Serializer):
 
 class DeactivateSerializer(serializers.Serializer):
     confirm = serializers.BooleanField(required=True)
+
+
+class SendMailSerializer(serializers.Serializer):
+    to_email = serializers.EmailField()
+    text = serializers.CharField()
+
+    # def save(self, **kwargs):
+    #     from django.core.mail import send_mail
+    #     print("sent")
+    #     # send_mail(
+    #     #     subject="Test Email",
+    #     #     message=validated_data['text'],
+    #     #     from_email=settings.EMAIL_HOST_USER,
+    #     #     recipient_list=[validated_data['to_email']],
+    #     #     fail_silently=False,
+    #     # )
+
+    def create(self, validated_data):
+        from django.core.mail import send_mail
+        print("sent")
+        send_mail(
+            subject="Test Email",
+            message=validated_data['text'],
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[validated_data['to_email']],
+            fail_silently=False,
+        )
+        return validated_data

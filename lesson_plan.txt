@@ -599,3 +599,111 @@ filterset_fields = {
 }
 
 
+1. Что такое SMTP 
+
+SMTP (Simple Mail Transfer Protocol) — это протокол для отправки писем.
+
+Django не отправляет письма сам, он передаёт их SMTP-серверу
+Gmail предоставляет SMTP-сервер: smtp.gmail.com
+
+
+from django.core.mail import send_mail
+
+
+send_mail(
+    'Тема письма',
+    'Текст письма',
+    
+)
+
+
+from django.
+
+
+
+
+
+
+
+
+
+1. PostgreSQL — это:
+
+Реляционная база данных (RDBMS)
+То есть данные хранятся в таблицах, которые связаны между собой.
+
+PostgreSQL =
+
+open-source
+надёжная
+очень мощная
+используется в production проектах (Netflix, Instagram, Reddit)
+
+
+
+2. PostgreSQL vs SQLite
+| SQLite               | PostgreSQL                          |
+| -------------------- | ----------------------------------- |
+| Файл на диске        | Сервер                              |
+| Для обучения         | Для production                      |
+| 1 пользователь       | Много пользователей                 |
+| Нет ролей            | Роли и права                        |
+| Минимум возможностей | Триггеры, индексы, JSON, транзакции |
+
+
+
+3. Основные понятия PostgreSQL
+
+Database — база данных
+Table — таблица
+Row — строка (запись)
+Column — колонка
+Primary Key — уникальный ID
+Foreign Key — связь между таблицами
+Index — ускорение поиска
+
+
+
+4. Как Django работает с PostgreSQL
+
+Python code → ORM → SQL → PostgreSQL
+
+
+6. Создание пользователя и базы
+
+linux/macos: sudo -u postgres psql 
+windwos: psql -U postgres
+
+CREATE DATABASE nurzaman;
+CREATE USER hadzhi WITH PASSWORD '2003hoji';
+ALTER ROLE hadzhi SET client_encoding TO 'utf8';
+ALTER ROLE hadzhi SET default_transaction_isolation TO 'read committed';
+ALTER ROLE hadzhi SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE nurzaman TO hadzhi;
+
+News.objects.all() -> SELECT * FROM news
+
+
+
+7. Установка драйвера для Django
+
+pip install psycopg2-binary
+
+
+
+8. Подключение PostgreSQL в Django
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'nurzaman',
+        'USER': 'hadzhi',
+        'PASSWORD': '2003hoji',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+
+ENGINE — тип БД
+HOST — где БД запущена
+PORT — стандартный порт PostgreSQL
