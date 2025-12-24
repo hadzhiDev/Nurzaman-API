@@ -93,9 +93,9 @@ AUTH_USER_MODEL = 'accounts.User'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': '2003',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -173,8 +173,8 @@ EMAIL_PORT = 587
 # EMAIL_PORT = 465
 
 
-EMAIL_HOST_USER = 'hm03.business@gmail.com'
-EMAIL_HOST_PASSWORD = 'ieaaqgmckuoeewqj'  
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''  
 
-DEFAULT_FROM_EMAIL = 'hm03.business@gmail.com'
+DEFAULT_FROM_EMAIL = ''
 
