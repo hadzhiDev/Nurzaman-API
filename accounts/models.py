@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser, PermissionsMixin
 
 from phonenumber_field.modelfields import PhoneNumberField
 from .managers import UserManager
+from django.utils import timezone
 
 
 
@@ -37,3 +38,21 @@ class User(AbstractUser, PermissionsMixin):
 
     def __str__(self):
         return f'{str(self.email) or self.first_name}'
+
+
+
+# Ptyhon Django
+# class User(models.Model):
+#     email = models.EmailField(unique=True, blank=False, null=False)
+#     age = models.PositiveIntegerField()
+#     created_at = models.DateTimeField(default=timezone.now)
+
+
+# SQL
+# CREATE TABLE users (
+#     id SERIAL PRIMARY KEY,
+#     email VARCHAR(255) UNIQUE NOT NULL,
+#     age INT,
+#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+# );
+  

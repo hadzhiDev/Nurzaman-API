@@ -1,0 +1,30 @@
+# Берём официальный Python образ
+FROM python:3.12-slim
+
+# Отключаем .pyc и буферизацию
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Рабочая директория внутри контейнера
+WORKDIR /app
+
+# Системные зависимости (для psycopg2, pillow)
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Копируем requirements
+COPY requirements.txt .
+
+# Устанавливаем Python зависимости
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Копируем весь проект
+COPY . .
+
+# Открываем порт
+EXPOSE 8000
+
+# Команда запуска
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -707,3 +707,220 @@ DATABASES = {
 ENGINE — тип БД
 HOST — где БД запущена
 PORT — стандартный порт PostgreSQL
+
+
+
+
+
+
+1. Создать базу данных
+CREATE DATABASE shop_db;
+
+2. Удалить базу данных
+DROP DATABASE shop_db;
+
+3. Создать таблицу
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    age INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+4. Удалить таблицу
+DROP TABLE users;
+
+5. Добавить данные в таблицу
+INSERT INTO accounts_user (email, password, first_name)
+VALUES ('test@mail.com', '2003', 'Hoji');
+
+6. Добавить несколько записей
+INSERT INTO users (email, age)
+VALUES 
+('a@mail.com', 20),
+('b@mail.com', 30);
+
+7. Выбрать все данные
+SELECT * FROM users;
+
+8. Выбрать конкретные колонки
+SELECT email, age FROM users;
+
+9. Фильтрация с WHERE
+SELECT * FROM users WHERE age > 18;
+
+10. Несколько условий (AND)
+SELECT * FROM users WHERE age > 18 AND age < 30;
+
+11. Логическое ИЛИ (OR)
+SELECT * FROM users WHERE age = 20 OR age = 30;
+
+12. Сортировка данных
+SELECT * FROM users ORDER BY age DESC;
+
+13. Ограничение количества строк
+SELECT * FROM users LIMIT 5;
+
+14. Пропуск строк (пагинация)
+SELECT * FROM users LIMIT 5 OFFSET 5;
+
+15. Обновление данных
+UPDATE users SET age = 26 WHERE email = 'test@mail.com';
+
+16. Удаление записи
+DELETE FROM users WHERE email = 'test@mail.com';
+
+17. Подсчёт количества строк
+SELECT COUNT(*) FROM users;
+
+18. Уникальные значения
+SELECT DISTINCT age FROM users;
+
+19. Диапазон значений
+SELECT * FROM users WHERE age BETWEEN 20 AND 30;
+
+20. Поиск по шаблону
+SELECT * FROM users WHERE email LIKE '%mail.com';
+
+21. Проверка на список значений
+SELECT * FROM users WHERE age IN (20, 25, 30);
+
+22. Проверка на NULL
+SELECT * FROM users WHERE age IS NULL;
+
+23. Создание таблицы с внешним ключом
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id),
+    total_price DECIMAL(10,2)
+);
+
+24. JOIN (объединение таблиц)
+SELECT users.email, orders.total_price
+FROM users
+JOIN orders ON users.id = orders.user_id;
+
+25. GROUP BY + COUNT
+SELECT age, COUNT(*)
+FROM users
+GROUP BY age;
+
+
+
+Main SQL Data Types (основные типы данных SQL)
+
+| Тип данных   | Описание (RU)             | Пример             |
+| ------------ | ------------------------- | -----------------  |
+|   INT        | Целые числа               | 1, 25, -10         | -> IntagerField
+|   VARCHAR(n) | Строка переменной длины   | "John", "Email"    | 
+|   TEXT       | Длинный текст             | "Описание товара"  |
+|   BOOLEAN    | Логический тип (да / нет) | TRUE, FALSE        |
+|   DATE       | Дата                      | 2025-12-27          |
+|   TIME       | Время                     | 14:30:00            |
+|   TIMESTAMP  | Дата и время              | 2025-12-27 14:30:00 |
+|   NULL       | Отсутствие значения       | NULL                |
+
+
+
+
+
+
+
+ENV
+
+
+
+.env — это файл, где хранятся секретные и изменяемые данные:
+пароли
+токены
+ключи API
+настройки для prod / dev
+
+
+Exampple vars :
+
+SECRET_KEY=secret-key
+DEBUG=True
+
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=2003
+DB_HOST=localhost
+DB_PORT=5432
+
+EMAIL_HOST_USER=hadzhi@gmail.com
+EMAIL_HOST_PASSWORD=edjhcedcgejhd
+
+ALLOWED_HOSTS=127.0.0.1,localhost
+
+
+Как Django обычно читает переменные окружения
+Через os.environ
+
+import os
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
+
+Python Decouple — зачем он нужен
+
+python-decouple:
+читает .env
+приводит типы
+даёт дефолты
+безопасный
+
+
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', cast=int),
+    }
+}
+
+
+
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    cast=lambda v: v.split(',')
+)
+
+
+Как это работает под капотом
+
+1️ Django запускается
+2️ python-decouple читает .env
+3️ Переменные становятся доступными
+4️ Код НЕ знает реальные значения
+
+
+
+
+Docker — это инструмент для упаковки приложения со ВСЕМИ зависимостями.
+
+
+
+
+Основные понятия Docker 
+
+Объясни 4 слова:
+
+Image
+Шаблон приложения (как ISO файл)
+
+Container
+Запущенный image (живое приложение)
+
+Dockerfile
+Инструкция как собрать image
+
+Docker Compose
+Запуск нескольких контейнеров (Django + DB)
