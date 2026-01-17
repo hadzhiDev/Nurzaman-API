@@ -210,3 +210,6 @@ __marimo__/
 migrations/
 *migrations/
 !*/migrations/__init__.py
+
+
+staticfiles
