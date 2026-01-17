@@ -7,6 +7,7 @@ from rest_framework import status
 from .serializers import (LoginSerializer, ProfileSerializer, FunctionChangePasswordSerializer, RegisterSerializer,
                           SendMailSerializer)
 
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def test_email_send(request):
