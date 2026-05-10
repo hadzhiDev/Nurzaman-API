@@ -121,6 +121,23 @@ def student_detail(request, pk):
 
 
 
+Swagger — это инструмент, который автоматически создаёт документацию для API.
+
+Проще:
+
+вы пишете API (views, serializers)
+Swagger сам показывает все endpoints
+можно тестировать API прямо в браузере
+
+
+Когда мы используем Swagger?
+Используем, когда:
+
+делаем REST API (Django Rest Framework)
+хотим видеть все endpoints в одном месте
+хотим удобно тестировать API
+frontend-разработчик должен понимать API
+
 
 
 from django.urls import path
@@ -148,10 +165,8 @@ urlpatterns = [
 
 
 
-Serializers
 
-
-Что такое Serializer в DRF?
+Serializer в DRF
 
 Serializer — это инструмент, который превращает данные модели в JSON и обратно.
 
@@ -295,6 +310,9 @@ SELECT * FROM main_object LIMIT 5 OFFSET 10
 
 
 unique_together = (('field1', 'field2'),) # в модели Django означает, что комбинация значений field1 и field2 должна быть уникальной для каждой записи в базе данных.
+
+
+
 
 
 
@@ -573,7 +591,8 @@ class DeactivateAccountView(generics.GenericAPIView):
 
 Что такое ViewSet в DRF
 
-ViewSet — это класс, который объединяет сразу несколько действий (list, retrieve, create, update, delete) в одном месте.
+ViewSet — это класс, который объединяет сразу несколько действий 
+(list, retrieve, create, update, delete) в одном месте.
 
 
 
